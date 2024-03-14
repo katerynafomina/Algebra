@@ -11,6 +11,9 @@ class LinearSystemGUI:
 
         self.matrix_entries = []
         self.vector_entries = []
+        self.matrix_rows = 0
+        self.matrix_columns = 0
+        self.vector_len = 0
 
         self.create_input_widgets()
 
@@ -76,9 +79,9 @@ class LinearSystemGUI:
         vector_frame = tk.Frame(self.master)
         vector_frame.pack()
 
-        for i in range(3):
+        for i in range(self.matrix_rows):
             row_entries = []
-            for j in range(3):
+            for j in range(self.matrix_columns):
                 entry = tk.Entry(matrix_frame, width=8)
                 entry.grid(row=i, column=j, padx=5, pady=5)
                 row_entries.append(entry)
@@ -138,9 +141,9 @@ class LinearSystemGUI:
                 operand2_entries.append(entry)
         else:
             operand2_entries = []
-            for i in range(3):
+            for i in range(self.matrix_rows):
                 row_entries = []
-                for j in range(3):
+                for j in range(self.matrix_columns):
                     entry = tk.Entry(operand2_frame, width=8)
                     entry.grid(row=i, column=j, padx=5, pady=5)
                     row_entries.append(entry)
@@ -206,6 +209,14 @@ class LinearSystemGUI:
                 # Convert data to floats
                 matrix_data = [[float(value) for value in row] for row in matrix_data]
                 vector_data = [float(value) for value in vector_data]
+
+                # Update matrix dimensions
+                self.matrix_rows = len(matrix_data)
+                self.matrix_columns = len(matrix_data[0])
+
+                # Ensure that matrix_entries is not empty
+                if not self.matrix_entries:
+                    self.create_input_widgets()
 
                 # Populate matrix entries
                 for i, row in enumerate(matrix_data):
