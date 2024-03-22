@@ -1,9 +1,10 @@
 from vector_matrix import Vector, Matrix
-
 class LinearSystemSolver:
     def __init__(self, matrix, vector):
         self.matrix = matrix
         self.vector = vector
+        self.upper_triangular = None
+        self.lower_triangular = None
 
     @classmethod
     def from_file(cls, filename):
@@ -17,30 +18,36 @@ class LinearSystemSolver:
                     vector.append(values[-1])
         return cls(Matrix(matrix), Vector(vector))
     
-    def gauss_elimination(self):
-        # Copy the matrix to avoid modifications to the original matrix
-        A = [row[:] for row in self.matrix.rows]
-        b = self.vector.elements[:]
+
+    @staticmethod
+    def gaussian_elimination(matrix, vector):
+        A = [row[:] for row in matrix.rows]
+        b = vector.elements[:]
         n = len(A)
 
+        upper_triangular = [row[:] for row in A]
+        lower_triangular = [[0] * n for _ in range(n)]
+
         for i in range(n):
-            # Find the maximum element in the column to choose the pivot element
+            lower_triangular[i][i] = 1.0
+
             max_index = i
             for j in range(i + 1, n):
                 if abs(A[j][i]) > abs(A[max_index][i]):
                     max_index = j
-            # Swap rows
+
             A[i], A[max_index] = A[max_index], A[i]
             b[i], b[max_index] = b[max_index], b[i]
 
-            # Gaussian elimination
             for j in range(i + 1, n):
                 factor = A[j][i] / A[i][i]
                 for k in range(i, n):
                     A[j][k] -= factor * A[i][k]
                 b[j] -= factor * b[i]
 
-        # Back substitution to find the solution
+        decomp_matrix=A
+            
+
         x = [0] * n
         for i in range(n - 1, -1, -1):
             x[i] = b[i]
@@ -48,44 +55,39 @@ class LinearSystemSolver:
                 x[i] -= A[i][j] * x[j]
             x[i] /= A[i][i]
 
-        return Vector(x)
+        return Vector(x), Matrix(decomp_matrix)
     
-    def decompose_matrix(self):
-        # Decompose the matrix into upper and lower triangular matrices
-        upper_triangular = []
-        lower_triangular = []
+    # def inverse_matrix(self):
+    #     # Compute the inverse matrix using the lower and upper triangular matrices
+    #     n = len(self.matrix.rows)
+    #     identity = Matrix([[1 if i == j else 0 for j in range(n)] for i in range(n)])
+    #     inverted_matrix = []
 
-        for i in range(len(self.matrix.rows)):
-            upper_row = [0] * i + self.matrix.rows[i][i:]
-            lower_row = self.matrix.rows[i][:i] + [0] * (len(self.matrix.rows) - i - 1) + [1]
+    #     for j in range(n):
+    #         column = [identity.rows[i][j] for i in range(n)]
+    #         inverted_column = self.__solve_column(self.lower_triangular, self.upper_triangular, column)
+    #         inverted_matrix.append(inverted_column.elements)
 
-            upper_triangular.append(upper_row)
-            lower_triangular.append(lower_row)
+    #     return Matrix(inverted_matrix)
 
-        upper_matrix = Matrix(upper_triangular)
-        lower_matrix = Matrix(lower_triangular)
+    # def __solve_column(self, lower_triangular, upper_triangular, column):
+    #     # Internal method to solve one column using forward and backward substitution
+    #     n = len(lower_triangular)
+    #     y = [0] * n
+    #     x = [0] * n
 
-        return upper_matrix, lower_matrix
+    #     # Forward substitution (Ly = b)
+    #     for i in range(n):
+    #         y[i] = column[i]
+    #         for j in range(i):
+    #             y[i] -= lower_triangular[i][j] * y[j]
+    #         y[i] /= lower_triangular[i][i]
 
-    def inverse_matrix(self):
-        # Compute the inverse matrix using Gaussian elimination
-        identity = Matrix([[1 if i == j else 0 for j in range(len(self.matrix.rows))] for i in range(len(self.matrix.rows))])
-        augmented_matrix = Matrix([self.matrix.rows[i] + identity.rows[i] for i in range(len(self.matrix.rows))])
+    #     # Backward substitution (Ux = y)
+    #     for i in range(n - 1, -1, -1):
+    #         x[i] = y[i]
+    #         for j in range(i + 1, n):
+    #             x[i] -= upper_triangular[i][j] * x[j]
+    #         x[i] /= upper_triangular[i][i]
 
-        # Solve the system of linear equations for each column of the augmented matrix
-        inverted_columns = []
-        for j in range(len(self.matrix.rows)):
-            column = [augmented_matrix.rows[i][j] for i in range(len(self.matrix.rows))]
-            inverted_column = self.__solve_column(augmented_matrix, column)
-            inverted_columns.append(inverted_column.elements)
-
-        # Convert column lists into rows to form the inverse matrix
-        inverted_rows = [[inverted_columns[i][j] for i in range(len(self.matrix.rows))] for j in range(len(self.matrix.rows))]
-        inverted_matrix = Matrix(inverted_rows)
-
-        return inverted_matrix
-
-    def __solve_column(self, augmented_matrix, column):
-        # Internal method to solve one column
-        solver = LinearSystemSolver(augmented_matrix, Vector(column))
-        return solver.gauss_elimination()
+    #     return Vector(x)

@@ -2,6 +2,13 @@ from math import *
 
 class Matrix:
     def __init__(self, rows):
+        if not isinstance(rows, list):
+            raise TypeError("Rows must be provided as a list")
+        if not rows:
+            raise ValueError("Rows cannot be empty")
+        num_columns = len(rows[0])
+        if not all(len(row) == num_columns for row in rows):
+            raise ValueError("All rows must have the same length")
         self.rows = rows
 
     def __add__(self, other):
