@@ -59,9 +59,29 @@ class LinearSystemGUI:
         self.gaussian_button = tk.Button(self.buttons_frame, text="Gaussian Method", command=self.display_gaussian_results)
         self.gaussian_button.grid(row=0, column=4, padx=5, pady=5)
 
+        self.checkResult = tk.Button(self.buttons_frame, text="check results", command=self.check_results)
+        self.checkResult.grid(row=1, column=4, padx=5, pady=5)
+
 
         self.result_label = tk.Label(self.master, text="")
         self.result_label.pack(pady=10)
+
+    def check_results(self):
+        try:
+            solver = LinearSystemSolver.from_file(".\matrix1.txt")
+            solution, upper_triangular_matrix = solver.gaussian_elimination(solver.matrix, solver.vector)
+            solution_rounded = Vector([round(x, 2) for x in solution.elements])
+            upper_triangular_matrix_rounded = Matrix(
+                [[round(x, 2) for x in row] for row in upper_triangular_matrix.rows])
+            result = solver.matrix*solution - solver.vector
+            print(result)
+            print(result.max_norm)
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
+            print(e)
+
+
+
 
     def open_operand_window_add(self):
         self.open_operand_window("Add")

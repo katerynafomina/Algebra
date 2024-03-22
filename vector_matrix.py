@@ -65,8 +65,8 @@ class Vector:
         if isinstance(other, Vector):
             if len(self.elements) != len(other.elements):
                 raise ValueError("Vectors must be of the same length for multiplication")
-            result =  [x * y for x, y in zip(self.elements, other.elements)]
-            return  Vector(result)
+            result = [x * y for x, y in zip(self.elements, other.elements)]
+            return Vector(result)
         elif isinstance(other, Matrix):
             if len(self.elements) != len(other.rows[0]):
                 raise ValueError("Vector length must match the number of columns in the matrix")

@@ -3,8 +3,8 @@ class LinearSystemSolver:
     def __init__(self, matrix, vector):
         self.matrix = matrix
         self.vector = vector
-        self.upper_triangular = None
-        self.lower_triangular = None
+        # self.upper_triangular = None
+        # self.lower_triangular = None
 
     @classmethod
     def from_file(cls, filename):
@@ -25,12 +25,14 @@ class LinearSystemSolver:
         b = vector.elements[:]
         n = len(A)
 
-        upper_triangular = [row[:] for row in A]
+
         lower_triangular = [[0] * n for _ in range(n)]
 
         for i in range(n):
+            #  Ініціалізація діагонального елементу нижньотрикутної матриці
             lower_triangular[i][i] = 1.0
 
+            # Вибір головного елементу та перестановка рядків
             max_index = i
             for j in range(i + 1, n):
                 if abs(A[j][i]) > abs(A[max_index][i]):
@@ -39,24 +41,24 @@ class LinearSystemSolver:
             A[i], A[max_index] = A[max_index], A[i]
             b[i], b[max_index] = b[max_index], b[i]
 
+            # Елімінація елементів під діагональним  елементом
             for j in range(i + 1, n):
                 factor = A[j][i] / A[i][i]
                 for k in range(i, n):
                     A[j][k] -= factor * A[i][k]
                 b[j] -= factor * b[i]
 
-        decomp_matrix=A
-            
+        decomp_matrix = A
 
         x = [0] * n
         for i in range(n - 1, -1, -1):
+            #  Обернена підстановка для знаходження розв'язку
             x[i] = b[i]
             for j in range(i + 1, n):
                 x[i] -= A[i][j] * x[j]
             x[i] /= A[i][i]
 
         return Vector(x), Matrix(decomp_matrix)
-    
     @staticmethod
     def inverse_matrix(matrix):
         n = len(matrix.rows)
