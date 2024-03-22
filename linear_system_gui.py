@@ -56,6 +56,9 @@ class LinearSystemGUI:
         self.get_norm_type_operand = tk.OptionMenu(self.buttons_frame, self.get_norm_type, "Module", "Euclidean")
         self.get_norm_type_operand.grid(row=1, column=3, padx=5, pady=5)
 
+        self.gaussian_button = tk.Button(self.buttons_frame, text="Gaussian Method", command=self.display_gaussian_results)
+        self.gaussian_button.grid(row=0, column=4, padx=5, pady=5)
+
 
         self.result_label = tk.Label(self.master, text="")
         self.result_label.pack(pady=10)
@@ -232,3 +235,75 @@ class LinearSystemGUI:
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred while loading data: {str(e)}")
                 print(e)
+
+    def display_gaussian_elimination_results(self, matrix, vector):
+        try:
+            solution, upper_triangular_matrix = LinearSystemSolver.gaussian_elimination(matrix, vector)
+            solution_rounded = Vector([round(x, 2) for x in solution.elements])
+            upper_triangular_matrix_rounded = Matrix([[round(x, 2) for x in row] for row in upper_triangular_matrix.rows])
+
+            result_window = tk.Toplevel(self.master)
+            result_window.title("Gaussian Elimination Results")
+
+            solution_label = tk.Label(result_window, text=f"Solution: {solution_rounded}")
+            solution_label.pack(pady=5)
+
+            upper_triangular_label = tk.Label(result_window, text="Upper Triangular Matrix:")
+            upper_triangular_label.pack(pady=5)
+
+            upper_triangular_text = tk.Text(result_window, height=len(upper_triangular_matrix.rows), width=len(upper_triangular_matrix.rows[0]) * 8)
+            upper_triangular_text.pack(pady=5)
+            for row in upper_triangular_matrix_rounded.rows:
+                upper_triangular_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred while performing Gaussian elimination: {str(e)}")
+            print(e)
+
+    def display_inverse_matrix(self, matrix):
+        try:
+            inverse_matrix_obj = LinearSystemSolver.inverse_matrix(matrix)
+
+            result_window = tk.Toplevel(self.master)
+            result_window.title("Inverse Matrix")
+
+            inverse_matrix_label = tk.Label(result_window, text="Inverse Matrix:")
+            inverse_matrix_label.pack(pady=5)
+
+            inverse_matrix_text = tk.Text(result_window, height=len(inverse_matrix_obj.rows), width=len(inverse_matrix_obj.rows[0]) * 8)
+            inverse_matrix_text.pack(pady=5)
+            for row in inverse_matrix_obj.rows:
+                inverse_matrix_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred while calculating the inverse matrix: {str(e)}")
+            print(e)
+
+    def display_gaussian_results(self):
+        try:
+            solver = LinearSystemSolver.from_file(".\matrix1.txt")
+            solution, upper_triangular_matrix = solver.gaussian_elimination(solver.matrix, solver.vector)
+            solution_rounded = Vector([round(x, 2) for x in solution.elements])
+            upper_triangular_matrix_rounded = Matrix([[round(x, 2) for x in row] for row in upper_triangular_matrix.rows])
+
+            result_window = tk.Toplevel(self.master)
+            result_window.title("Gaussian Elimination Results")
+
+            solution_label = tk.Label(result_window, text=f"Solution: {solution_rounded}")
+            solution_label.pack(pady=5)
+
+            upper_triangular_label = tk.Label(result_window, text="Upper Triangular Matrix:")
+            upper_triangular_label.pack(pady=5)
+
+            upper_triangular_text = tk.Text(result_window, height=len(upper_triangular_matrix.rows), width=len(upper_triangular_matrix.rows[0]) * 8)
+            upper_triangular_text.pack(pady=5)
+            for row in upper_triangular_matrix_rounded.rows:
+                upper_triangular_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
+
+            inverse_matrix_button = tk.Button(result_window, text="Inverse Matrix", command=lambda: self.display_inverse_matrix(solver.matrix))
+            inverse_matrix_button.pack(pady=5)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred while performing Gaussian elimination: {str(e)}")
+            print(e)
+
