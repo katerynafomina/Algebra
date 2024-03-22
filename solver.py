@@ -57,6 +57,25 @@ class LinearSystemSolver:
 
         return Vector(x), Matrix(decomp_matrix)
     
+    @staticmethod
+    def inverse_matrix(matrix):
+        n = len(matrix.rows)
+        inverse = Matrix([[0] * n for _ in range(n)])
+        
+        for i in range(n):
+            column = Vector([1 if j == i else 0 for j in range(n)])
+            inverted_column, _ = LinearSystemSolver.gaussian_elimination(matrix, column)
+
+            for j in range(len(inverted_column)):
+                inverse.rows[j][i] = inverted_column.elements[j]
+
+        for i in range(n):
+            for j in range(n):
+                inverse.rows[i][j] = round(inverse.rows[i][j], 2)
+
+        return inverse
+
+    
     # def inverse_matrix(self):
     #     # Compute the inverse matrix using the lower and upper triangular matrices
     #     n = len(self.matrix.rows)

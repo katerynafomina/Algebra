@@ -51,6 +51,9 @@ class Vector:
             return Vector([x + y for x, y in zip(self.elements, other.elements)])
         raise ValueError("Vectors must be of the same length")
 
+    def __len__(self):
+        return len(self.elements)
+
     def __sub__(self, other):
         if isinstance(other, Vector) and len(self.elements) == len(other.elements):
             return Vector([x - y for x, y in zip(self.elements, other.elements)])
