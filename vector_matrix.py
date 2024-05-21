@@ -47,6 +47,10 @@ class Matrix:
 
     def __len__(self):
         return len(self.rows)
+    
+    def neighbors(self, vertex):
+        return [i for i, val in enumerate(self.rows[vertex]) if val != 0]
+
 
 class Vector:
     def __init__(self, elements):
@@ -66,8 +70,6 @@ class Vector:
         raise ValueError("Vectors must be of the same length")
 
     def __mul__(self, other):
-        # if isinstance(other, (int, float)):
-        #     return Vector([x * other for x in self.elements])
         if isinstance(other, Vector):
             if len(self.elements) != len(other.elements):
                 raise ValueError("Vectors must be of the same length for multiplication")
@@ -88,7 +90,6 @@ class Vector:
         return max(abs(x) for x in self.elements)
 
     def __str__(self):
-        # Перевизначення методу __str__ для виведення вектора у зручний формат
         return ' '.join(map(str, self.elements))
 
     def __len__(self):
@@ -97,3 +98,54 @@ class Vector:
     def __getitem__(self, index):
         return self.elements[index]
 
+    def __setitem__(self, index, value):
+        self.elements[index] = value
+class BandedMatrix:
+    def __init__(self, lower_bandwidth, upper_bandwidth, rows):
+        self.lower_bandwidth = lower_bandwidth
+        self.upper_bandwidth = upper_bandwidth
+        self.rows = rows
+        self.n = len(rows[0])  # Кількість стовпців у головній діагоналі
+
+    def __getitem__(self, index):
+        i, j = index
+        band = j - i
+        if band < -self.lower_bandwidth or band > self.upper_bandwidth:
+            return 0  # Elements outside the bandwidth are zero
+        return self.rows[band + self.lower_bandwidth][i]
+
+
+    def __getitem__(self, index):
+        if isinstance(index, tuple):
+            i, j = index
+            band = j - i
+            if band < -self.lower_bandwidth or band > self.upper_bandwidth:
+                return 0  # Elements outside the bandwidth are zero
+            return self.rows[band + self.lower_bandwidth][i]
+        elif isinstance(index, int):
+            # Handle single index for getting a row
+            return self.rows[index]
+
+    def __setitem__(self, index, value):
+        if isinstance(index, tuple):
+            i, j = index
+            band = j - i
+            if band < -self.lower_bandwidth or band > self.upper_bandwidth:
+                raise IndexError("Trying to access element outside the bandwidth")
+            self.rows[band + self.lower_bandwidth][i] = value
+        elif isinstance(index, int):
+            # Handle single index for setting a row
+            self.rows[index] = value
+
+    def to_full_matrix(self):
+        full_matrix = [[0] * self.n for _ in range(self.n)]
+        for i in range(self.n):
+            for j in range(max(0, i - self.lower_bandwidth), min(self.n, i + self.upper_bandwidth + 1)):
+                full_matrix[i][j] = self[i, j]
+        return full_matrix
+
+    def __str__(self):
+        matrix_str = ""
+        for row in self.rows:
+            matrix_str += " ".join(str(elem) for elem in row) + "\n"
+        return matrix_str

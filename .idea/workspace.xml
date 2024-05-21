@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d7ae41a7-b607-4c33-9f2e-e272cb04b2bb" name="Changes" comment="">
+    <list default="true" id="d7ae41a7-b607-4c33-9f2e-e272cb04b2bb" name="Changes" comment="working zeidel with view ang gause string without view">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/linear_system_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/linear_system_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -56,7 +56,14 @@
       <option name="project" value="LOCAL" />
       <updated>1711106924611</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="working zeidel with view ang gause string without view">
+      <created>1716253751692</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1716253751692</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -72,6 +79,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="some changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="some changes" />
+    <MESSAGE value="working zeidel with view ang gause string without view" />
+    <option name="LAST_COMMIT_MESSAGE" value="working zeidel with view ang gause string without view" />
   </component>
 </project>

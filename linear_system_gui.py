@@ -65,7 +65,7 @@ class LinearSystemGUI:
         self.seidel_button = tk.Button(self.buttons_frame, text="Seidel Method", command=self.display_seidel_results)
         self.seidel_button.grid(row=0, column=5, padx=5, pady=5)
 
-        self.seidel_button = tk.Button(self.buttons_frame, text="Gause String", command=self.display_gaussian_string_method)
+        self.seidel_button = tk.Button(self.buttons_frame, text="Gause String", command=self.open_gaussian_string_window)
         self.seidel_button.grid(row=1, column=5, padx=5, pady=5)
 
         self.result_label = tk.Label(self.master, text="")
@@ -264,6 +264,8 @@ class LinearSystemGUI:
                 self.matrix_rows = len(matrix_data)
                 self.matrix_columns = len(matrix_data[0])
 
+                self.vector_len = len(vector_data)
+
                 # Ensure that matrix_entries is not empty
                 if not self.matrix_entries:
                     self.create_input_widgets()
@@ -282,40 +284,67 @@ class LinearSystemGUI:
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred while loading data: {str(e)}")
                 print(e)
-    @staticmethod
-    def gauss_elimination(matrix, vector):
-        n = len(matrix)
 
-        # Прямий хід
-        for i in range(n):
-            # Знаходимо головний елемент рядка
-            pivot = matrix[i][i]
-            if pivot == 0:
-                raise ValueError("Матриця не має унікального розв’язку")
+    def open_gaussian_string_window(self):
+        operand_window = tk.Toplevel(self.master)
+        operand_window.title("Enter Matrix and Vector")
 
-            # Проходимо по усіх рядках нижче поточного
-            for j in range(i + 1, n):
-                # Якщо елемент не нульовий, виконуємо операції над стрічками
-                if matrix[j][i] != 0:
-                    factor = matrix[j][i] / pivot
-                    for k in range(i, n):
-                        matrix[j][k] -= factor * matrix[i][k]
-                    vector[j] -= factor * vector[i]
+        label_matrix = tk.Label(operand_window, text="Enter Matrix:")
+        label_matrix.grid(row=0, column=0, padx=5, pady=5)
 
-        # Зворотний хід (обернена підстановка)
-        solutions = [0] * n
-        for i in range(n - 1, -1, -1):
-            solutions[i] = vector[i]
-            for j in range(i + 1, n):
-                solutions[i] -= matrix[i][j] * solutions[j]
-            solutions[i] /= matrix[i][i]
+        matrix_frame = tk.Frame(operand_window)
+        matrix_frame.grid(row=0, column=1, padx=5, pady=5)
 
-        return solutions
-    def display_gaussian_string_method(self):
-        pass
+        label_vector = tk.Label(operand_window, text="Enter Vector:")
+        label_vector.grid(row=1, column=0, padx=5, pady=5)
+
+        vector_frame = tk.Frame(operand_window)
+        vector_frame.grid(row=1, column=1, padx=5, pady=5)
+
+        # Create matrix entry fields
+        matrix_entries = []
+        for i in range(self.matrix_rows):
+            row_entries = []
+            for j in range(self.matrix_columns):
+                entry = tk.Entry(matrix_frame, width=8)
+                entry.grid(row=i, column=j, padx=5, pady=5)
+                row_entries.append(entry)
+            matrix_entries.append(row_entries)
+
+        # Create vector entry fields
+        vector_entries = []
+        for i in range(self.vector_len):
+            entry = tk.Entry(vector_frame, width=8)
+            entry.grid(row=i, column=0, padx=5, pady=5)  # Fix: Use the same column index as the matrix entries
+            vector_entries.append(entry)
+
+        calculate_button = tk.Button(operand_window, text="Calculate",
+                                     command=lambda: self.calculate_gaussian_string(matrix_entries, vector_entries))
+        calculate_button.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
 
     def calculate_gaussian_string(self, matrix_entries, vector_entries):
-       pass
+        try:
+            matrix = [[float(entry.get()) for entry in row] for row in matrix_entries]
+            vector = [float(entry.get()) for entry in vector_entries]
+            solver=LinearSystemSolver(matrix, vector)
+
+            solutions, matrix = solver.gauss_elimination_str(matrix, vector)
+
+            result_window = tk.Toplevel(self.master)
+            result_window.title("Gaussian String Method Results")
+
+            solution_label = tk.Label(result_window, text=f"Solution: {solutions}")
+            solution_label.pack(pady=5)
+
+            matrix_label = tk.Label(result_window, text=f"Solution: {matrix}")
+            matrix_label.pack(pady=6)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred while performing Gaussian string method: {str(e)}")
+            print(e)
+
+    def display_gaussian_string_method(self):
+        self.open_gaussian_string_window()
 
     def display_gaussian_elimination_results(self, matrix, vector):
         try:
