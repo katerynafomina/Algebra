@@ -77,38 +77,59 @@ class LinearSystemSolver:
 
         return inverse
 
-    
-    # def inverse_matrix(self):
-    #     # Compute the inverse matrix using the lower and upper triangular matrices
-    #     n = len(self.matrix.rows)
-    #     identity = Matrix([[1 if i == j else 0 for j in range(n)] for i in range(n)])
-    #     inverted_matrix = []
+    @staticmethod
+    def seidel_method(matrix, vector, tolerance=1e-6, max_iterations=10000):
+        n = len(matrix.rows)
+        x = [0] * n  # Initial guess
+        iterations = 0
 
-    #     for j in range(n):
-    #         column = [identity.rows[i][j] for i in range(n)]
-    #         inverted_column = self.__solve_column(self.lower_triangular, self.upper_triangular, column)
-    #         inverted_matrix.append(inverted_column.elements)
+        while iterations < max_iterations:
+            x_new = x[:]
+            for i in range(n):
+                sum_ax = sum(matrix.rows[i][j] * x_new[j] for j in range(n) if j != i)
+                x_new[i] = (vector.elements[i] - sum_ax) / matrix.rows[i][i]
 
-    #     return Matrix(inverted_matrix)
+            # Calculate the residual norm
+            residual = matrix * Vector(x_new) - vector
+            norm_residual = residual.max_norm()
 
-    # def __solve_column(self, lower_triangular, upper_triangular, column):
-    #     # Internal method to solve one column using forward and backward substitution
-    #     n = len(lower_triangular)
-    #     y = [0] * n
-    #     x = [0] * n
+            if norm_residual < tolerance:
+                return Vector(x_new), iterations + 1
 
-    #     # Forward substitution (Ly = b)
-    #     for i in range(n):
-    #         y[i] = column[i]
-    #         for j in range(i):
-    #             y[i] -= lower_triangular[i][j] * y[j]
-    #         y[i] /= lower_triangular[i][i]
+            x = x_new
+            iterations += 1
 
-    #     # Backward substitution (Ux = y)
-    #     for i in range(n - 1, -1, -1):
-    #         x[i] = y[i]
-    #         for j in range(i + 1, n):
-    #             x[i] -= upper_triangular[i][j] * x[j]
-    #         x[i] /= upper_triangular[i][i]
+        # If we reached max_iterations without converging, raise an error or return a status indicating failure
+        raise ValueError("Seidel method did not converge within the maximum number of iterations")
 
-    #     return Vector(x)
+    @staticmethod
+    def gauss_elimination(matrix, vector):
+        n = len(matrix)
+
+        # Прямий хід
+        for i in range(n):
+            # Знаходимо головний елемент рядка
+            pivot = matrix[i][i]
+            if pivot == 0:
+                raise ValueError("Матриця не має унікального розв’язку")
+
+            # Проходимо по усіх рядках нижче поточного
+            for j in range(i + 1, n):
+                # Якщо елемент не нульовий, виконуємо операції над стрічками
+                if matrix[j][i] != 0:
+                    factor = matrix[j][i] / pivot
+                    for k in range(i, n):
+                        matrix[j][k] -= factor * matrix[i][k]
+                    vector[j] -= factor * vector[i]
+
+        # Зворотний хід (обернена підстановка)
+        solutions = [0] * n
+        for i in range(n - 1, -1, -1):
+            solutions[i] = vector[i]
+            for j in range(i + 1, n):
+                solutions[i] -= matrix[i][j] * solutions[j]
+            solutions[i] /= matrix[i][i]
+
+        return solutions
+
+

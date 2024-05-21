@@ -62,6 +62,11 @@ class LinearSystemGUI:
         self.checkResult = tk.Button(self.buttons_frame, text="check results", command=self.check_results)
         self.checkResult.grid(row=1, column=4, padx=5, pady=5)
 
+        self.seidel_button = tk.Button(self.buttons_frame, text="Seidel Method", command=self.display_seidel_results)
+        self.seidel_button.grid(row=0, column=5, padx=5, pady=5)
+
+        self.seidel_button = tk.Button(self.buttons_frame, text="Gause String", command=self.display_gaussian_string_method)
+        self.seidel_button.grid(row=1, column=5, padx=5, pady=5)
 
         self.result_label = tk.Label(self.master, text="")
         self.result_label.pack(pady=10)
@@ -219,6 +224,28 @@ class LinearSystemGUI:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
             print(e)
 
+    def display_seidel_results(self):
+        try:
+            solver = LinearSystemSolver.from_file("./matrix1.txt")
+            solution, iterations = solver.seidel_method(solver.matrix, solver.vector)
+
+            result_window = tk.Toplevel(self.master)
+            result_window.title("Seidel Method Results")
+
+            solution_label = tk.Label(result_window, text=f"Solution: {solution}")
+            solution_label.pack(pady=5)
+
+            iterations_label = tk.Label(result_window, text=f"Iterations: {iterations}")
+            iterations_label.pack(pady=5)
+
+            residual_norm_label = tk.Label(result_window,
+                                           text=f"Residual Norm: {solver.matrix * solution - solver.vector}")
+            residual_norm_label.pack(pady=5)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred while performing Seidel method: {str(e)}")
+            print(e)
+
     # filename = filedialog.askopenfilename(initialdir="/", title="Select File",
     #
     def load_data(self):
@@ -255,9 +282,44 @@ class LinearSystemGUI:
             except Exception as e:
                 messagebox.showerror("Error", f"An error occurred while loading data: {str(e)}")
                 print(e)
+    @staticmethod
+    def gauss_elimination(matrix, vector):
+        n = len(matrix)
+
+        # Прямий хід
+        for i in range(n):
+            # Знаходимо головний елемент рядка
+            pivot = matrix[i][i]
+            if pivot == 0:
+                raise ValueError("Матриця не має унікального розв’язку")
+
+            # Проходимо по усіх рядках нижче поточного
+            for j in range(i + 1, n):
+                # Якщо елемент не нульовий, виконуємо операції над стрічками
+                if matrix[j][i] != 0:
+                    factor = matrix[j][i] / pivot
+                    for k in range(i, n):
+                        matrix[j][k] -= factor * matrix[i][k]
+                    vector[j] -= factor * vector[i]
+
+        # Зворотний хід (обернена підстановка)
+        solutions = [0] * n
+        for i in range(n - 1, -1, -1):
+            solutions[i] = vector[i]
+            for j in range(i + 1, n):
+                solutions[i] -= matrix[i][j] * solutions[j]
+            solutions[i] /= matrix[i][i]
+
+        return solutions
+    def display_gaussian_string_method(self):
+        pass
+
+    def calculate_gaussian_string(self, matrix_entries, vector_entries):
+       pass
 
     def display_gaussian_elimination_results(self, matrix, vector):
         try:
+
             solution, upper_triangular_matrix = LinearSystemSolver.gaussian_elimination(matrix, vector)
             solution_rounded = Vector([round(x, 2) for x in solution.elements])
             upper_triangular_matrix_rounded = Matrix([[round(x, 2) for x in row] for row in upper_triangular_matrix.rows])

@@ -31,6 +31,9 @@ class Matrix:
         else:
             raise ValueError("Invalid multiplication")
 
+    def __getitem__(self, index):
+        return self.rows[index]
+
     def euclidean_norm(self):
         print('fmd')
         return sqrt(sum(sum(x**2 for x in row) for row in self.rows))
@@ -41,6 +44,9 @@ class Matrix:
     def __str__(self):
         # Перевизначення методу __str__ для виведення матриці у зручний формат
         return '\n'.join([' '.join(map(str, row)) for row in self.rows])
+
+    def __len__(self):
+        return len(self.rows)
 
 class Vector:
     def __init__(self, elements):
@@ -84,3 +90,10 @@ class Vector:
     def __str__(self):
         # Перевизначення методу __str__ для виведення вектора у зручний формат
         return ' '.join(map(str, self.elements))
+
+    def __len__(self):
+        return len(self.elements)
+
+    def __getitem__(self, index):
+        return self.elements[index]
+
