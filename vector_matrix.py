@@ -11,45 +11,28 @@ class Matrix:
             raise ValueError("All rows must have the same length")
         self.rows = rows
 
-    def __add__(self, other):
-        if isinstance(other, Matrix) and len(self.rows) == len(other.rows) and len(self.rows[0]) == len(other.rows[0]):
-            return Matrix([[x + y for x, y in zip(row1, row2)] for row1, row2 in zip(self.rows, other.rows)])
-        raise ValueError("Matrices must have the same dimensions")
-
-    def __sub__(self, other):
-        if isinstance(other, Matrix) and len(self.rows) == len(other.rows) and len(self.rows[0]) == len(other.rows[0]):
-            return Matrix([[x - y for x, y in zip(row1, row2)] for row1, row2 in zip(self.rows, other.rows)])
-        raise ValueError("Matrices must have the same dimensions")
-
-    def __mul__(self, other):
-        if isinstance(other, Matrix) and len(self.rows[0]) == len(other.rows):
-            return Matrix([[sum(a * b for a, b in zip(row1, col)) for col in zip(*other.rows)] for row1 in self.rows])
-        elif isinstance(other, Vector) and len(self.rows[0]) == len(other.elements):
-            result = [sum(a * b for a, b in zip(row, other.elements)) for row in self.rows]
-            return Vector(result)
-
-        else:
-            raise ValueError("Invalid multiplication")
-
     def __getitem__(self, index):
         return self.rows[index]
 
-    def euclidean_norm(self):
-        print('fmd')
-        return sqrt(sum(sum(x**2 for x in row) for row in self.rows))
-
-    def max_norm(self):
-        return max(abs(x) for row in self.rows for x in row)
-
-    def __str__(self):
-        # Перевизначення методу __str__ для виведення матриці у зручний формат
-        return '\n'.join([' '.join(map(str, row)) for row in self.rows])
-
     def __len__(self):
         return len(self.rows)
-    
+
     def neighbors(self, vertex):
         return [i for i, val in enumerate(self.rows[vertex]) if val != 0]
+
+    def degree(self, vertex):
+        return sum(1 for val in self.rows[vertex] if val != 0)
+
+    def reorder(self, order):
+        n = len(self.rows)
+        new_rows = [[0] * n for _ in range(n)]
+        for i in range(n):
+            for j in range(n):
+                new_rows[i][j] = self.rows[order[i]][order[j]]
+        self.rows = new_rows
+
+    def __str__(self):
+        return '\n'.join([' '.join(map(str, row)) for row in self.rows])
 
 
 class Vector:

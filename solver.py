@@ -195,16 +195,16 @@ class LinearSystemSolver:
                 if weight != 0 and neighbor not in visited:
                     queue.append((neighbor, distance + 1))
         return -1  # Шлях не знайдено
-        
+
     @staticmethod
-    def gibbs_algorithm(matrix):
+    def gibbs_algorithm(matrix, startVertex):
         def build_level_structure(matrix, start_vertex):
             levels = {start_vertex: 0}
             current_level = [start_vertex]
             next_level = []
             level = 1
             level_dict = {0: [start_vertex]}
-            
+
             while current_level:
                 for vertex in current_level:
                     for neighbor in matrix.neighbors(vertex):
@@ -217,7 +217,7 @@ class LinearSystemSolver:
                 current_level = next_level
                 next_level = []
                 level += 1
-            
+
             # Повертаємо рівні у відсортованому порядку
             sorted_levels = {}
             for lvl in sorted(level_dict.keys()):
@@ -226,14 +226,13 @@ class LinearSystemSolver:
 
             return sorted_levels
 
-            
         def eccentricity(matrix, start_vertex):
             levels = build_level_structure(matrix, start_vertex)
             print(f"Рівні для вершини {start_vertex}: {levels}")
             return max(levels.values())
 
         # 1. Вибираємо стартову вершину (рекомендовано з малим степенем)
-        start_vertex = min(range(len(matrix)), key=lambda v: len(matrix.neighbors(v)))
+        start_vertex = startVertex
         print(f"Початкова стартова вершина: {start_vertex}")
 
         while True:
@@ -272,3 +271,35 @@ class LinearSystemSolver:
                     # Якщо такої вершини немає, це означає, що поточна вершина - псевдопериферійна
                     print(f"Знайдена псевдопериферійна вершина: {start_vertex}")
                     return start_vertex
+
+    @staticmethod
+    def cuthill_mckee(matrix, startVertex):
+        n = len(matrix.rows)
+        visited = [False] * n
+        permutation = []
+
+        start_vertex = LinearSystemSolver.gibbs_algorithm(matrix, startVertex)
+        permutation.append(start_vertex)
+        visited[start_vertex] = True
+
+        queue = [start_vertex]
+
+        while queue:
+            current_vertex = queue.pop(0)
+            neighbors = [v for v in matrix.neighbors(current_vertex) if not visited[v]]
+            neighbors.sort(key=lambda x: matrix.degree(x))
+
+            for neighbor in neighbors:
+                if not visited[neighbor]:
+                    permutation.append(neighbor)
+                    visited[neighbor] = True
+                    queue.append(neighbor)
+
+        # Додаємо невідвідані вершини
+        for i in range(n):
+            if not visited[i]:
+                permutation.append(i)
+                visited[i] = True
+
+        matrix.reorder(permutation)
+        return matrix, permutation
