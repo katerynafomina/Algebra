@@ -4,6 +4,22 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from solver import LinearSystemSolver
 
+matrix_data = [
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+    [0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0],
+    [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+    [0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1]
+]
+
+adjacency_matrix = Matrix(matrix_data)
+
 class LinearSystemGUI:
     def __init__(self, master):
         self.master = master
@@ -67,6 +83,10 @@ class LinearSystemGUI:
 
         self.seidel_button = tk.Button(self.buttons_frame, text="Gause String", command=self.open_gaussian_string_window)
         self.seidel_button.grid(row=1, column=5, padx=5, pady=5)
+
+        self.seidel_button = tk.Button(self.buttons_frame, text="4 lab ",
+                                       command=self.open_graphs_task_window)
+        self.seidel_button.grid(row=2, column=3, padx=5, pady=5)
 
         self.result_label = tk.Label(self.master, text="")
         self.result_label.pack(pady=10)
@@ -285,6 +305,9 @@ class LinearSystemGUI:
                 messagebox.showerror("Error", f"An error occurred while loading data: {str(e)}")
                 print(e)
 
+
+
+
     def open_gaussian_string_window(self):
         operand_window = tk.Toplevel(self.master)
         operand_window.title("Enter Matrix and Vector")
@@ -343,8 +366,7 @@ class LinearSystemGUI:
             messagebox.showerror("Error", f"An error occurred while performing Gaussian string method: {str(e)}")
             print(e)
 
-    def display_gaussian_string_method(self):
-        self.open_gaussian_string_window()
+
 
     def display_gaussian_elimination_results(self, matrix, vector):
         try:
@@ -389,6 +411,55 @@ class LinearSystemGUI:
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred while calculating the inverse matrix: {str(e)}")
             print(e)
+
+    def open_graphs_task_window(self):
+        graphs_window = tk.Toplevel(self.master)
+        graphs_label = tk.Label(graphs_window, text="matrix:")
+        graphs_label.pack(pady=5)
+        graphs_triangular_text = tk.Text(graphs_window, height=len(adjacency_matrix.rows),
+                                        width=len(adjacency_matrix.rows[0]) * 8)
+        graphs_triangular_text.pack(pady=5, anchor='center')
+        for row in adjacency_matrix.rows:
+            graphs_triangular_text.insert(tk.END, ' '.join(map(str, row)) + '\n')
+
+        
+        input_label = tk.Label(graphs_window, text="enter number of verticles:")
+        input_label.pack(pady=5)
+        inputI = tk.Entry(graphs_window, width=10)
+        inputJ = tk.Entry(graphs_window, width=10)
+        inputI.pack(pady=5)
+        inputJ.pack(pady=5)
+        button = tk.Button(graphs_window, text="find distanse", command=lambda: find_distance())
+        button.pack(pady=5)
+        def find_distance():
+             result_label = tk.Label(graphs_window, text=f"result: {LinearSystemSolver.find_path_length(adjacency_matrix,int(inputI.get()), int(inputJ.get()))}")
+             result_label.pack(pady=5)
+        gibbs_label = tk.Label(graphs_window, text="enter number of verticle:")
+        gibbs_label.pack(pady=5)
+        gibbs_input = tk.Entry(graphs_window, width=10)
+        gibbs_input.pack(pady=5)
+        gibbs_button = tk.Button(graphs_window, text="find pseudoperipheral vertex", command=lambda: find_pseudoperipheral_vertex())
+        gibbs_button.pack(pady=5)
+        def find_pseudoperipheral_vertex():
+            result_label = tk.Label(graphs_window, text=f"result: {LinearSystemSolver.gibbs_algorithm(adjacency_matrix, int(gibbs_input.get()))}")
+            result_label.pack(pady=5)
+        cuthill_label = tk.Label(graphs_window, text="enter number of verticle:")
+        cuthill_label.pack(pady=5)
+        cuthill_input = tk.Entry(graphs_window, width=10)
+        cuthill_input.pack(pady=5)
+        cuthill_button = tk.Button(graphs_window, text="find new matrix", command=lambda: find_new_matrix())
+        cuthill_button.pack(pady=5)
+        def find_new_matrix():
+            new_matrix, permutation = LinearSystemSolver.cuthill_mckee(adjacency_matrix, int(cuthill_input.get()))
+            result_label = tk.Label(graphs_window, text=f"result: {new_matrix}")
+            result_label.pack(pady=5)
+            permutation_label = tk.Label(graphs_window, text=f"permutation: {permutation}")
+            permutation_label.pack(pady=5)
+
+
+
+
+
 
     def display_gaussian_results(self):
         try:
